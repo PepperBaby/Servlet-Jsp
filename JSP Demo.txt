@@ -1,0 +1,198 @@
+***********First.jsp***********************
+
+
+<%@page import="java.time.LocalDate"%>
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+<h1> Today's Date: <%=LocalDate.now() %></h1>      <!-- expression"="/Scriplet/scripting/embedding java code in html -->
+<%!
+String company="Capgemini";
+String getMessage(int n){
+	String message = " ";
+	for(int x = 1;x<=n;x++)
+	{
+		message+=company;
+		message+="\t";
+	}
+	return message;
+}
+%>
+<%for(int i=1;i<=10;i++){ 
+if(i%2==0){%>
+
+ <h2 style="color:green"><%=i%> * 15 =  <%=i*15 %> <%out.print(getMessage(i)); %></h2>
+	<%}
+else{%>
+<h2 style = "color:red"><%=i%> * 15 =  <%=i*15%></h2>
+<%}} %>
+</body>
+</html>
+
+*************Divide.jsp***********************
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+<%@page errorPage="MyError.jsp" %>
+
+<!-- <%@include file="Header.jsp" %> -->
+
+<jsp:include page="Header.jsp">
+<jsp:param name="Company" value="Capgemini"/>
+<jsp:param name="color" value="Blue"/>
+</jsp:include>
+
+<form>
+
+Enter a number: <input type="number" name="txtN1"/><br/>
+Enter another number: <input type="number" name="txtN2"/><br/>
+<input type="submit" value = "divide"/>
+</form>
+<%
+String strN1 = request.getParameter("txtN1");
+String strN2 = request.getParameter("txtN2");
+if(strN1!=null && strN2!=null)
+{
+	int n1 = Integer.parseInt(strN1);
+	int n2 = Integer.parseInt(strN2);
+%>
+	Result = <%=n1/n2%>
+<%}%>
+
+</body>
+</html>
+
+*************Header.jsp****************
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+<%
+String company = request.getParameter("Company");
+String color = request.getParameter("color");
+%>
+<h1 style="color:<%=color%>">Welcome to <%=company%></h1>
+</body>
+</html>
+
+***********MyError******************
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+<%@page isErrorPage="true" %>
+<h1 style="color:red">
+	Exception Occur:<%=exception.getMessage() %>
+</h1>
+</body>
+</html>
+
+*************Index.html****************
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+Registration Form
+<form action="Register.jsp">
+Enter your name:<input type="text" name="ename"/>
+Enter your age:<input type="text" name="age"/>
+<input type="submit" value="Go"/>
+</form>
+</body>
+</html>
+
+************Register.jsp*****************
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+<jsp:useBean id = "emp" class="com.demo.bean.Employee" scope="request"/>
+
+{<jsp:setProperty property="*" name="emp"/>}
+		OR
+<jsp:setProperty property="ename" name="emp" param="ename"/>
+<jsp:setProperty property="age" name="emp" param="age"/>
+
+<jsp:forward page="Success.jsp"/>
+</body>
+</html>
+
+
+************Success.jsp*****************
+
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+<jsp:useBean id="emp" class="com.demo.bean.Employee" scope="request"/>
+Employee registered with below details:<br/>
+<jsp:getProperty property="ename" name="emp" />
+<jsp:getProperty property="age" name="emp" />
+</body>
+</html>
+
+********Employee.java***************************
+package com.demo.bean;
+
+public class Employee {
+
+	private String ename;
+	private int age;
+	
+	public Employee() {
+		super();
+	}
+	
+
+
+
+	public String getEname() {
+		return ename;
+	}
+	public void setEname(String ename) {
+		this.ename = ename;
+	}
+	public int getAge() {
+		return age;
+	}
+	public void setAge(int age) {
+		this.age = age;
+	}
+	
+}
+

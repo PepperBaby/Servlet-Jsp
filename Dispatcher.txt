@@ -1,0 +1,209 @@
+**************web.xml*****************
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd" id="WebApp_ID" version="3.1">
+  <display-name>DispatcherProject</display-name>
+  <welcome-file-list>
+    <welcome-file>Home.html</welcome-file>
+  </welcome-file-list>
+  <context-param>
+    <param-name>cName</param-name>
+    <param-value>Capgemini</param-value>
+  </context-param>
+</web-app>
+
+*********Home.html************************
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+<a href="/DispatcherProject/HelloServlet">Wish me</a>
+</body>
+</html>
+
+**********Footer.html********************
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+<hr color='blue' size='15'/>
+CopyRight @Capgemini India.<br/>
+About Us: We are First in India.
+</body>
+</html>
+
+********HelloServlet************************
+package com.cg.web;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import javax.servlet.annotation.WebInitParam;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+@WebServlet(urlPatterns={"/HelloServlet"},
+initParams={
+		@WebInitParam(name="cityName", value ="Pune"),
+		@WebInitParam(name="location", value ="Talwade")
+})
+public class HelloServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+   ServletConfig cg = null;
+    public HelloServlet() {
+        super();
+       
+    }
+
+	public void init(ServletConfig config) throws ServletException {
+		super.init(config);
+		cg=config;
+	}
+
+	public void destroy() {
+		
+	}
+
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		doPost(request,response);
+	}
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+		String city = cg.getInitParameter("cityName");
+		String location = cg.getInitParameter("location");
+		PrintWriter pw = response.getWriter(); 
+		RequestDispatcher rdHeader = request.getRequestDispatcher("HeaderServlet");
+		RequestDispatcher rdFooter = request.getRequestDispatcher("HTMLs/Footer.html");
+		
+		String conType = response.getContentType();
+		int portNo = request.getLocalPort();
+		
+		rdHeader.include(request, response);
+		pw.println(" City : "+city+" Location : "+location );
+		pw.println("<br/>Mime Type is : "+conType);
+		pw.println("<br/>Port No is : "+portNo);
+		
+		rdFooter.include(request, response);
+
+		
+		
+	}
+
+}
+
+*********HeaderServlet**********************
+package com.cg.web;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+@WebServlet("/HeaderServlet")
+public class HeaderServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+   
+    public HeaderServlet() {
+        super();
+      
+    }
+
+	public void init(ServletConfig config) throws ServletException {
+		
+	}
+
+	public void destroy() {
+		
+	}
+
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		doPost(request,response);
+	}
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		PrintWriter out = response.getWriter();
+		out.println("<marquee>Welcome To Capgemini  : India</marquee>");
+		out.println("<br/><a href='/DispatcherProject/Home.html'>Home</a>");
+		out.println("<br/><a href='/DispatcherProject/CareerServlet'>Careers</a>");
+		out.println("<br/><hr color= 'green' size= '3'/>");
+
+	}
+
+}
+
+************CareerServlet**********************
+package com.cg.web;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+@WebServlet("/CareerServlet")
+public class CareerServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+     
+	ServletConfig cg = null;
+    public CareerServlet() {
+        super();
+        
+    }
+
+	public void init(ServletConfig config) throws ServletException {
+		super.init(config);
+		cg=config;
+	}
+
+	public void destroy() {
+		
+	}
+
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		doPost(request,response);
+	}
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		PrintWriter pw = response.getWriter();
+		ServletContext ctx = cg.getServletContext();
+		
+		
+		String compName = ctx.getInitParameter("cName");
+		pw.println("<br/>This is career Page of " + compName);
+		
+	}
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,378 @@
+********SessionDemo************************
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+<a href='/Session_Project/RedirectServlet' >Go TO Google </a><br/>
+<a href='/Session_Project/BookCataLogServlet' >Show the booklist </a>
+</body>
+</html>
+
+******RedirectServlet****************************
+package com.cg.web;
+
+import java.io.IOException;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+@WebServlet("/RedirectServlet")
+public class RedirectServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+     
+    public RedirectServlet() {
+        super();
+        
+    }
+
+	public void init(ServletConfig config) throws ServletException {
+		
+	}
+
+	public void destroy() {
+		
+	}
+
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		doPost(request,response);
+	}
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		response.sendRedirect("https://www.google.com/");
+	}
+
+}
+
+***********BookCatalogServlet***********************
+package com.cg.web;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+@WebServlet("/BookCataLogServlet")
+public class BookCataLogServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+     
+    public BookCataLogServlet() {
+        super();
+       
+    }
+
+	public void init(ServletConfig config) throws ServletException {
+		
+	}
+
+	public void destroy() {
+		
+	}
+
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		doPost(request,response);
+	}
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		PrintWriter pw=response.getWriter();
+		pw.println("<body bgcolor='green'>");
+		pw.println("<h1>Select Book</h1>");
+		pw.println("<form action='/Session_Project/CartServlet'>");
+		pw.println("<select name='txtBook'>");
+		pw.println("<option value = 'java' >Java</option>");
+		pw.println("<option value = 'C' >C</option>");
+		pw.println("<option value = 'Oracle' >Oracle</option>");
+		pw.println("<option value = 'html' >html</option>");
+		pw.println("<input type='submit' value='Add To cart' name='btnAddCart'/>");
+		pw.println("</select>");
+		pw.println("</form>");
+		pw.println("</body>");
+	}
+
+}
+
+********CartServlet************************
+package com.cg.web;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+@WebServlet("/CartServlet")
+public class CartServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+   
+    public CartServlet() {
+        super();
+        
+    }
+
+	public void init(ServletConfig config) throws ServletException {
+		
+	}
+
+	public void destroy() {
+		
+	}
+
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		doPost(request,response);
+	}
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+		PrintWriter pw = response.getWriter();
+		String book = request.getParameter("txtBook");
+		//One client one session and every session has unique session id
+		HttpSession session = request.getSession(true); //check session exists or not if not create new else continue with old one  
+		ArrayList<String> bookList = (ArrayList)session.getAttribute("BookListObj");
+		if(bookList==null)
+		{
+			bookList = new ArrayList<String>();
+			bookList.add(book);
+			session.setAttribute("BookListObj", bookList);
+		}
+		else
+		{
+			bookList.add(book);
+			session.setAttribute("BookListObj", bookList);
+		}
+		pw.println("<br/>Id it a new Session? : "+session.isNew());
+		pw.println("<br/>Session Id: "+session.getId());
+		pw.println("<br/>Max Interval? : "+session.getMaxInactiveInterval());
+		pw.println("<hr/>");
+		pw.println("Items In Cart: "+bookList);
+		pw.println("<br/>Do you want to continue Shopping?");
+		pw.println("<a href='/Session_Project/BookCataLogServlet'>Go To Book Catalog</a>");
+	}
+
+}
+
+********Cookie.html***************************
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+<h2> Enter Ur name here...</h2>
+<form action="/Session_Project/AddCookieServlet" method="post">
+Enter UR Name:<input type= "text" name="txtName"/><br/>
+<input type="submit" name="btnSubmit" value = "Add Name To Cookie"/>
+</form>
+</body>
+</html>
+
+**************AddCookieServlet********************
+package com.cg.web;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+@WebServlet("/AddCookieServlet")
+public class AddCookieServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+    int count = 0 ;
+    public AddCookieServlet() {
+        super();
+      
+    }
+
+	public void init(ServletConfig config) throws ServletException {
+	
+	}
+
+	public void destroy() {
+		
+	}
+
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		doPost(request,response);
+	}
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String nm = request.getParameter("txtName");
+		Cookie cookArr[]=request.getCookies();
+		Cookie myCookie = null;
+		String cookName = null;
+		if(cookArr==null)
+		{
+			count =1;
+			cookName="UserName-"+count;		//
+			myCookie=new Cookie(cookName,nm);
+			response.addCookie(myCookie);
+			
+		}
+		else
+		{
+			count=(cookArr.length+1);
+			cookName="UserName-"+count;
+			myCookie=new Cookie(cookName,nm);
+			response.addCookie(myCookie);
+		}
+		PrintWriter pw = response.getWriter();
+		pw.println("<br/>Data is added in the Cookie. ");
+		pw.println("<br/><a href='/Session_Project/GetCookieServlet'>Get All Cookies</a>");
+		
+	}
+
+}
+
+***********GetCookieServlet**********************
+package com.cg.web;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+@WebServlet("/GetCookieServlet")
+public class GetCookieServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+     ServletConfig cg = null;
+    public GetCookieServlet() {
+        super();
+       
+    }
+
+	public void init(ServletConfig config) throws ServletException {
+	 
+		super.init(config);
+		cg= config;
+	}
+
+	public void destroy() {
+		
+	}
+
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		doPost(request,response);
+	}
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		PrintWriter pw = response.getWriter();
+		Cookie cookies[]=request.getCookies();
+		if(cookies==null)
+		{
+			pw.println("No data in the cookie");
+		}
+		else
+		{
+			for (int i=0;i<cookies.length;i++)
+			{
+				pw.println("<br/>Cookie Name Is: "+cookies[i].getName());
+				pw.println("<br/>Cookie Value Is: "+cookies[i].getValue());
+			}
+		}
+		
+	}
+
+}
+
+***********URLReWrite.html***********************
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+<a href="/Session_Project/UrlRewriteServlet?id=0">Go To Servlet</a> 
+<!-- Append data to URL after url?variableName=initialValue -->
+</body>
+</html>
+
+******UrlRewriteServlet*********************
+package com.cg.web;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+@WebServlet("/UrlRewriteServlet")
+public class UrlRewriteServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+     ServletConfig cg = null;
+     int  count;
+     
+    public UrlRewriteServlet() {
+        super(); 
+    }
+
+	public void init(ServletConfig config) throws ServletException {
+	super.init(config);
+	cg = config;
+	}
+
+	public void destroy() {
+		
+	}
+
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		doPost(request,response);
+	}
+	
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String iid = request.getParameter("id");
+		if(iid==null)
+		{
+			iid="1";
+			count = Integer.parseInt(iid);
+			count++;
+		}
+		else
+		{
+			count = Integer.parseInt(iid);
+			count++;
+		}
+		PrintWriter pw = response.getWriter();
+		pw.println("<b>I was Visited : " + count + " Times.</b>");
+		pw.println("<br/>Do You want to Visit me again?");
+		pw.println("<a href='/Session_Project/UrlRewriteServlet?id="+count+"'>Click Here To Visit Again</a>");
+	}
+
+}
+
+
+
+
+

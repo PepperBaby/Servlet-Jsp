@@ -1,0 +1,482 @@
+******************web.xml*********************
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd" id="WebApp_ID" version="3.1">
+  <display-name>MVC_Project_App</display-name>
+  <welcome-file-list>
+    <welcome-file>Home.jsp</welcome-file>
+  </welcome-file-list>
+</web-app>
+
+*******Home.jsp******************************
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+<% 
+response.sendRedirect("LoginController?action=ShowWelcomePage");
+%>
+</body>
+</html>
+
+
+************Pages/Login.jsp**********************
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Insert title here</title>
+</head>
+
+<body bgcolor="cyan">
+<%
+	String msg = (String) request.getAttribute("ErrorMsgObj");
+if(msg != null)
+{
+	out.println("<font color='red'>"+msg+"</font>");
+}
+%>
+<hr color="blue" size= "6"/>
+	<h1>Login Form Enter your Login Details Here!</h1>
+	<form action = "LoginController?action=ShowSuccessPage" method ="post">
+		User Name:<input type="text" name="txtName" value=""/><br/>
+		Password:<input type="password" name="txtPwd" value=""/><br/>
+		<input type="submit" name="btnLogin" value="LOGIN"/><br/>
+	</form>
+</body>
+
+</html>
+
+*****************Pages/Welcome.jsp*****************
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+<a href="LoginController?action=ShowLoginPage">LOGIN</a><br/>
+<a href="">REGISTER</a><br/>
+
+</body>
+</html>
+
+*************LoginController.java**************************
+package com.cg.user.ctrl;
+
+import java.io.IOException;
+
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import com.cg.user.dto.Login;
+import com.cg.user.service.LoginService;
+import com.cg.user.service.LoginServiceImpl;
+
+@WebServlet("/LoginController")
+public class LoginController extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+    
+	LoginService logSer = null;
+	ServletConfig cg = null;
+	
+    public LoginController() {
+        super();
+           }
+
+	public void init(ServletConfig config) throws ServletException {
+		super.init(config);
+		cg = config;
+	}
+
+	public void destroy() {
+		
+	}
+
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		doPost(request,response);
+	}
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+		HttpSession session = request.getSession(true);
+		logSer = new LoginServiceImpl();
+		String action = request.getParameter("action");
+		RequestDispatcher rd = null;
+		if(action != null)
+		{	
+			try
+			{
+				/**********ShowWelcomePage*********/
+				if(action.equals("ShowWelcomePage"))
+				{
+					rd = request.getRequestDispatcher("Pages/Welcome.jsp");
+					rd.forward(request, response);
+				}
+				/********End ShowWelcomePage******/
+				
+				/************ShowLoginPage********/
+				if(action.equals("ShowLoginPage"))
+				{
+					rd = request.getRequestDispatcher("Pages/Login.jsp");
+					rd.forward(request, response);
+				}
+				/********End ShowLoginPage********/
+				
+				/**********ShowSuccessPage********/
+				if(action.equals("ShowSuccessPage"))
+				{
+					String unm = request.getParameter("txtName");
+					String pwd = request.getParameter("txtPwd");
+					Login user = logSer.getUserByUnm(unm);
+					
+					if((user.getUserName().equalsIgnoreCase(unm)) 
+							&& (user.getPassword().equalsIgnoreCase(pwd)))
+					{
+						session.setAttribute("UserNameObj", unm);
+						rd = request.getRequestDispatcher("SuccessPage");
+						rd.forward(request, response);
+					}
+					else
+					{
+						String msg = "Sorry, Please Check Your Password.";
+						request.setAttribute("ErrorMsgObj", msg);
+						rd = request.getRequestDispatcher("Pages/Login.jsp");
+						rd.forward(request, response);
+					}
+				}
+				/******End ShowSuccessPage********/
+				
+			}
+			
+			catch (Exception ee)
+			{
+				String erMsg = ee.getMessage();
+				request.setAttribute("ErrorMsgObj", erMsg);
+				RequestDispatcher rdError = request.getRequestDispatcher("ShowErrorPage");
+				rdError.forward(request, response);
+			}
+			
+		}
+		else
+		{
+			response.getWriter().println("No Action Defined...");
+		}
+		
+	}
+
+}
+**************DBUtil.java**************
+package com.cg.user.util;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
+
+import com.cg.user.exception.LoginException;
+
+public class DBUtil {
+
+	public static Connection getCon() throws LoginException
+	{
+		Connection con = null;
+		InitialContext context;
+		try 
+		{
+			context = new InitialContext();
+			DataSource ds = (DataSource) context.lookup("java:/jdbc/OracleDS");
+			con = ds.getConnection();
+		} 
+		catch (Exception e)
+		{
+			throw new LoginException(e.getMessage());
+		}
+		return con;
+	}
+}
+
+
+***************SuccessPage.java**********************
+package com.cg.user.ui;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+@WebServlet("/SuccessPage")
+public class SuccessPage extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+   
+	ServletConfig cg = null;
+	
+    public SuccessPage() {
+        super();
+        
+    }
+
+	public void init(ServletConfig config) throws ServletException {
+		super.init(config);
+		cg = config;
+	}
+
+	public void destroy() {
+		
+	}
+
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		doPost(request,response);
+	}
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+		PrintWriter out = response.getWriter();
+		HttpSession ses = request.getSession(true);
+		String nm = (String) ses.getAttribute("UserNameObj");
+		
+		
+		out.println("<b>Welcome to EMS: "+nm+" </b><br/>");
+		out.println("<b>You are a Valid User : </b><br/>");
+		out.println("<hr color='green' size='3'/><br/>");
+		out.println("You can perform all Emp Operations<br/>");
+		out.println("<a href = ''>Add Emp</a><br/>");
+		out.println("<a href = ''>List All Emp</a><br/>");
+		out.println("<a href = ''>Delete Emp</a><br/>");
+		out.println("<a href = ''>Update Emp</a><br/>");
+
+	}
+
+}
+
+************Dao*******************************
+package com.cg.user.dao;
+
+import java.sql.SQLException;
+
+import com.cg.user.dto.Login;
+import com.cg.user.exception.LoginException;
+
+
+
+public interface LoginDao {
+
+	public Login getUserByUnm(String unm) throws LoginException;
+}
+************DaoImpl*****************
+package com.cg.user.dao;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import com.cg.user.dto.Login;
+import com.cg.user.exception.LoginException;
+import com.cg.user.util.DBUtil;
+
+
+public class LoginDaoImpl implements LoginDao {
+
+	Connection con = null;
+	PreparedStatement pst = null;
+	ResultSet rs =null;
+	
+	
+	@Override
+	public Login getUserByUnm(String unm) throws LoginException {
+		Login user = null;
+		try
+		{
+		con = DBUtil.getCon();
+		System.out.println("Got Connection: ");
+		String qry ="SELECT * FROM user_142884 WHERE user_id=?";
+		pst=con.prepareStatement(qry);
+		pst.setString(1, unm);
+		rs=pst.executeQuery();
+		rs.next();
+		user = new Login(rs.getString("user_id"),rs.getString("password"));
+		}
+		catch (SQLException e)
+		{
+			throw new LoginException(e.getMessage());
+		}
+		return user;
+	}
+ 
+}
+
+***********Service******************
+package com.cg.user.service;
+
+import java.sql.SQLException;
+
+import com.cg.user.dto.Login;
+import com.cg.user.exception.LoginException;
+
+
+
+public interface LoginService {
+	public Login getUserByUnm(String unm) throws LoginException;
+}
+**********ServiceImpl******************
+package com.cg.user.service;
+
+import java.sql.SQLException;
+
+import com.cg.user.dao.LoginDao;
+import com.cg.user.dao.LoginDaoImpl;
+import com.cg.user.dto.Login;
+import com.cg.user.exception.LoginException;
+
+
+public class LoginServiceImpl implements LoginService{
+
+	LoginDao logDao =null;
+	public LoginServiceImpl() {
+		logDao = new LoginDaoImpl();
+	}
+
+	@Override
+	public Login getUserByUnm(String unm) throws LoginException {
+		return logDao.getUserByUnm(unm);
+	}
+
+}
+
+************class**********************
+package com.cg.user.dto;
+
+public class Login {
+	private String userName;
+	private String password;
+	
+	//Getter and Setter
+	public String getUserName() {
+		return userName;
+	}
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+	public String getPassword() {
+		return password;
+	}
+	public void setPassword(String password) {
+		this.password = password;
+	}
+	
+	//Constructors
+	public Login() {
+		super();
+ 	}
+	public Login(String userName, String password) {
+		super();
+		this.userName = userName;
+		this.password = password;
+	}
+	
+	//Display method
+	@Override
+	public String toString() {
+		return "Login [userName=" + userName + ", password=" + password + "]";
+	}	
+}
+
+*************ErrorPage*********************
+package com.cg.user.errors;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+@WebServlet("/ShowErrorPage")
+public class ShowErrorPage extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+    
+    public ShowErrorPage() {
+        super();
+       
+    }
+
+	public void init(ServletConfig config) throws ServletException {
+		
+	}
+
+	public void destroy() {
+		
+	}
+
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		doPost(request,response);
+	}
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		PrintWriter out = response.getWriter();
+		String ermsg = (String) request.getAttribute("ErrorMsgObj");
+		out.println("<font color='red'>"+ermsg+"</font>");
+		
+	}
+
+}
+
+********Exception*****************
+package com.cg.user.exception;
+
+public class LoginException extends Exception{
+
+	public LoginException() {
+		super();
+		 
+	}
+
+	public LoginException(String message, Throwable cause,
+			boolean enableSuppression, boolean writableStackTrace) {
+		super(message, cause, enableSuppression, writableStackTrace);
+		 
+	}
+
+	public LoginException(String message, Throwable cause) {
+		super(message, cause);
+		 
+	}
+
+	public LoginException(String message) {
+		super(message);
+		 
+	}
+
+	public LoginException(Throwable cause) {
+		super(cause);
+		 
+	}
+
+}
+

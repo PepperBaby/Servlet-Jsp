@@ -1,0 +1,107 @@
+********************Login.html***************
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+<h2>Enter ur Login details.....</h2>
+<form action = "/FilterProject/GreetServlet" method ="get">
+User Name:<input type="text" name="txtName" value=""/><br/>
+Password:<input type="password" name="txtPwd" value=""/><br/>
+<input type="submit" name="btnLogin" value="LOGIN"/><br/>
+</form>
+</body>
+</html>
+
+**************GreetServlet********************
+package com.cg.web;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+@WebServlet("/GreetServlet")
+public class GreetServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+    
+    public GreetServlet() {
+        super();
+       
+    }
+
+	public void init(ServletConfig config) throws ServletException {
+		
+	}
+
+	public void destroy() {
+		
+	}
+
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		doPost(request,response);
+	}
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+		PrintWriter out = response.getWriter();
+		String nm = request.getParameter("txtName");
+		out.println("<b>Welcome U R A Valid User "+nm+"</b>");
+	}
+
+}
+
+************AuthenticationFilter***********************
+package com.cg.filter;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.annotation.WebFilter;
+
+@WebFilter(filterName="AuthenticateFilter",urlPatterns={"/GreetServlet"})
+public class AuthenticateFilter implements Filter 
+{
+    public AuthenticateFilter() 
+    {
+       
+    }
+
+	public void destroy() 
+	{
+		
+	}
+
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+		PrintWriter out = response.getWriter();
+		String unm = request.getParameter("txtName");
+		String pwd = request.getParameter("txtPwd");
+		if(unm.equals("admin") && (pwd.equals("admin")))
+		{
+			chain.doFilter(request, response); //for joining multiple filters
+		}
+		else
+		{
+			out.println("Sorry u are not allowed to go to the Greet Servlet");
+		}
+	
+	}
+
+	public void init(FilterConfig fConfig) throws ServletException {
+		
+	}
+
+}
